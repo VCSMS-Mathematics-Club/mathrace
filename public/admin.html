@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Math Blitz admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; font-family: 'Comic Neue', 'Comic Sans MS', sans-serif; font-weight: 700; background: #ffd400; color: #000; }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 40px 16px; }
+  h1 { font-family: 'Bangers', Impact, sans-serif; font-weight: 400; font-size: 3rem; margin: 0 0 20px; letter-spacing: .03em; }
+  .panel { background: #fffdf6; border: 4px solid #000; box-shadow: 8px 8px 0 #000; padding: 22px; }
+  label { display: block; margin: 14px 0 4px; }
+  input, select { width: 100%; font: inherit; border: 4px solid #000; padding: 8px 10px; background: #fff; }
+  button { margin-top: 20px; font-family: 'Bangers', Impact, sans-serif; font-size: 1.5rem; letter-spacing: .05em; background: #e4002b; color: #fff; border: 4px solid #000; box-shadow: 5px 5px 0 #000; padding: 6px 20px; cursor: pointer; }
+  .msg { margin-top: 16px; border: 3px solid #000; padding: 8px 12px; }
+  .ok { background: #c6f2d7; } .bad { background: #e4002b; color: #fff; }
+  p { font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Club officer tools</h1>
+  <div class="panel">
+    <p>Needs the ADMIN_KEY set on the server. Every action applies to one player.</p>
+    <form id="f">
+      <label for="key">Admin key</label>
+      <input id="key" type="password" autocomplete="off" required>
+      <label for="user">Player's username</label>
+      <input id="user" required>
+      <label for="action">What to do</label>
+      <select id="action">
+        <option value="reset-password">Reset their password</option>
+        <option value="remove-scores">Remove them from every leaderboard</option>
+        <option value="delete-user">Delete their account</option>
+      </select>
+      <div id="pw-wrap">
+        <label for="pw">New password</label>
+        <input id="pw" autocomplete="off">
+      </div>
+      <button type="submit" id="go">Reset password</button>
+      <div id="msg" class="msg" role="alert" hidden></div>
+    </form>
+  </div>
+</div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const LABELS = { 'reset-password': 'Reset password', 'remove-scores': 'Remove scores', 'delete-user': 'Delete account' };
+  $('action').onchange = () => { $('pw-wrap').hidden = $('action').value !== 'reset-password'; $('go').textContent = LABELS[$('action').value]; };
+  $('f').onsubmit = async (e) => {
+    e.preventDefault();
+    const action = $('action').value;
+    if (action === 'delete-user' && !confirm('Delete ' + $('user').value + ' for good?')) return;
+    const res = await fetch('/api/admin', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: $('key').value, username: $('user').value, action, newPassword: $('pw').value }) });
+    const data = await res.json().catch(() => ({}));
+    $('msg').hidden = false;
+    $('msg').className = 'msg ' + (res.ok ? 'ok' : 'bad');
+    $('msg').textContent = res.ok ? data.message : (data.error || 'Request failed (' + res.status + ').');
+  };
+</script>
+</body>
+</html>
