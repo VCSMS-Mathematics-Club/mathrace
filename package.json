@@ -1,0 +1,14 @@
+{
+  "name": "math-blitz",
+  "version": "1.0.0",
+  "description": "Timed mental arithmetic game with accounts and a monthly leaderboard, for the VCSMS Mathematics Club.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
